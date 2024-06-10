@@ -10,20 +10,20 @@ class MynewsdeskSpider(scrapy.Spider):
     allowed_domains = ["mynewsdesk.com"]
 
     def start_requests(self):
-        urls = []
-        news_urls_path = Path(__file__).resolve().parent.parent.parent.parent / 'urls'
+        news_urls_path = Path(__file__).resolve().parent.parent.parent.parent / 'urls/input'
+        waiting_path = news_urls_path / 'waiting'
         processed_path = news_urls_path / 'processed'
         processed_path.mkdir(exist_ok=True)
 
-        for file_path in news_urls_path.glob('*.json'):
+        for file_path in waiting_path.glob('*.json'):
             with file_path.open('r', encoding='utf-8') as file:
                 data = json.load(file)
-                urls.append(data['url'])
+                url = data.get('url')
+                if url:
+                    meta = {'input_file_name': file_path.name}
+                    yield scrapy.Request(url=url, callback=self.parse, meta=meta)
 
             shutil.move(str(file_path), str(processed_path / file_path.name))
-
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
         main_content = response.xpath('//article[@class="panel"]//text()').getall()
@@ -31,7 +31,10 @@ class MynewsdeskSpider(scrapy.Spider):
         if main_content:
             main_content = ' '.join(main_content).strip()
             main_content = re.sub(r'\s+', ' ', main_content).strip()
-            print(main_content)
-            yield {'title': title, 'main_content': main_content}
+            yield {
+                'title': title,
+                'main_content': main_content,
+                'input_file_name': response.meta['input_file_name']
+            }
         else:
             self.logger.info('No main content found')

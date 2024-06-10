@@ -6,23 +6,21 @@
 
 # useful for handling different item types with a single interface
 import json
+from pathlib import Path
 
 
 class ScrapyNews2PostPipeline:
     def open_spider(self, spider):
-        self.file = open('scrapy_output.json', 'w', encoding='utf-8')
-        self.file.write('[\n')
-        self.first_item = True
-
-    def close_spider(self, spider):
-        self.file.write('\n]')
-        self.file.close()
+        self.output_path = Path(__file__).resolve().parent.parent.parent / 'urls/output'
+        self.output_path.mkdir(exist_ok=True)
 
     def process_item(self, item, spider):
-        if not self.first_item:
-            self.file.write(',\n')
-        self.first_item = False
-        line = json.dumps(dict(item), ensure_ascii=False)
-        self.file.write(line)
+        input_file_name = item.pop('input_file_name', None)
+        if input_file_name:
+            output_file = self.output_path / f"{Path(input_file_name).stem}_output.json"
+
+            with output_file.open('w', encoding='utf-8') as f:
+                json.dump(item, f, ensure_ascii=False, indent=4)
+
         return item
 
