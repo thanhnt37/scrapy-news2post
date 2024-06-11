@@ -19,7 +19,7 @@ class ScrapyNews2PostPipeline:
         self.output_path = langchain_waiting_path
 
     def process_item(self, item, spider):
-        input_file_name = item.pop('input_file_name', None)
+        input_file_name = item.get('news_id', None)
         if input_file_name:
             output_file = self.output_path / f"{Path(input_file_name).stem}.json"
 

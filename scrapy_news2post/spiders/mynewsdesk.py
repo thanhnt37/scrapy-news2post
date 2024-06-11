@@ -20,7 +20,7 @@ class MynewsdeskSpider(scrapy.Spider):
                 data = json.load(file)
                 url = data.get('url')
                 if url:
-                    meta = {'input_file_name': file_path.name}
+                    meta = {'news_id': file_path.name, 'url': url}
                     yield scrapy.Request(url=url, callback=self.parse, meta=meta)
 
             shutil.move(str(file_path), str(processed_path / file_path.name))
@@ -33,8 +33,9 @@ class MynewsdeskSpider(scrapy.Spider):
             main_content = re.sub(r'\s+', ' ', main_content).strip()
             yield {
                 'title': title,
-                'main_content': main_content,
-                'input_file_name': response.meta['input_file_name']
+                'content': main_content,
+                'news_id': response.meta['news_id'],
+                'url': response.meta['url']
             }
         else:
             self.logger.info('No main content found')
