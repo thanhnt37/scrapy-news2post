@@ -10,7 +10,7 @@ class MynewsdeskSpider(scrapy.Spider):
     allowed_domains = ["mynewsdesk.com"]
 
     def start_requests(self):
-        news_urls_path = Path(__file__).resolve().parent.parent.parent.parent / 'urls/input'
+        news_urls_path = Path(__file__).resolve().parent.parent.parent.parent / 'urls/scrapy'
         waiting_path = news_urls_path / 'waiting'
         processed_path = news_urls_path / 'processed'
         processed_path.mkdir(exist_ok=True)
