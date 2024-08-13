@@ -29,7 +29,7 @@ def generate_messages_from_files(folder_path):
                             "language. The output should be divided into multiple sections, with a minimum of 1 "
                             "section and a maximum of 6 sections, depending on the length and content of the article. "
                             "Each section should cover one main topic of the article. Please present it in the "
-                            "following json structure and enclose the attribute with double quotes: {\"title\": use raw title, \"description\": generate a new short description for this article, \"sections\": [{\"heading\": \"...\", \"text\": \"...\"}]}"),
+                            "following json structure and enclose the attribute with double quotes: {\"title\": use raw title, \"description\": use the same language of article then generate a short description, \"sections\": [{\"heading\": \"...\", \"text\": \"...\"}]}"),
                 HumanMessage(content=f"the article title: {item['title']}"),
                 HumanMessage(content=f"the article content: {item['content']}")
             ]
