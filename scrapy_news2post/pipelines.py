@@ -11,19 +11,26 @@ from pathlib import Path
 
 class ScrapyNews2PostPipeline:
     def open_spider(self, spider):
-        self.output_path = Path(__file__).resolve().parent.parent.parent / 'urls'
-        langchain_path = self.output_path / 'langchain'
-        langchain_path.mkdir(exist_ok=True)
-        langchain_waiting_path = langchain_path / 'waiting'
-        langchain_waiting_path.mkdir(exist_ok=True)
-        self.output_path = langchain_waiting_path
+        news_urls_path = Path(__file__).resolve().parent.parent.parent / 'urls/scrapy'
+        waiting_path = news_urls_path / 'waiting'
+        processed_path = news_urls_path / 'processed'
+        processed_path.mkdir(exist_ok=True)
+        self.output_path = processed_path
+
+        dynamodb_path = Path(__file__).resolve().parent.parent.parent / 'urls/dynamodb'
+        dynamodb_tmp_path = dynamodb_path / 'tmp'
+        dynamodb_tmp_path.mkdir(exist_ok=True)
+        self.dynamodb_tmp_path = dynamodb_tmp_path
 
     def process_item(self, item, spider):
         input_file_name = item.get('news_id', None)
         if input_file_name:
             output_file = self.output_path / f"{Path(input_file_name).stem}.json"
-
             with output_file.open('w', encoding='utf-8') as f:
+                json.dump(item, f, ensure_ascii=False, indent=4)
+
+            dynamodb_tmp_output_file = self.dynamodb_tmp_path / f"{Path(input_file_name).stem}.json"
+            with dynamodb_tmp_output_file.open('w', encoding='utf-8') as f:
                 json.dump(item, f, ensure_ascii=False, indent=4)
 
         return item
