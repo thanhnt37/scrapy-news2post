@@ -28,6 +28,8 @@ class MynewsdeskSpider(scrapy.Spider):
     def parse(self, response):
         main_content = response.xpath('//article[@class="panel"]//text()').getall()
         title = response.xpath('//h1[@class="panel__title"]//text()').get()
+        published_date = response.xpath('//p[@class="type__date"]/time/@datetime').get()
+        first_paragraph = response.xpath('//div[@class="panel__text"]/p[1]/text()').get()
         if main_content:
             main_content = ' '.join(main_content).strip()
             main_content = re.sub(r'\s+', ' ', main_content).strip()
@@ -35,7 +37,9 @@ class MynewsdeskSpider(scrapy.Spider):
                 'title': title,
                 'content': main_content,
                 'news_id': response.meta['news_id'],
-                'url': response.meta['url']
+                'url': response.meta['url'],
+                'published_date': published_date,
+                'first_paragraph': first_paragraph
             }
         else:
             self.logger.info('No main content found')
